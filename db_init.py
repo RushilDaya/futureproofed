@@ -1,5 +1,5 @@
 # this script initializes / recreates a sqlite database
-# and populates it with the initial data
+# and populates it with the initial metadata
 
 import sqlite3
 import json
@@ -8,6 +8,7 @@ import json
 conn = sqlite3.connect('datastore.db') 
 c = conn.cursor()
 
+# turn this into a function
 c.execute('''
           DROP TABLE IF EXISTS country
           ''')
@@ -29,7 +30,7 @@ c.execute('''
 conn.commit()
 
 # CREATE TABLES
-
+# turn these into functions which load the schema from a file
 c.execute('''
           CREATE TABLE country (
           country_code varchar(2) NOT NULL,
@@ -88,7 +89,7 @@ c.execute('''
 conn.commit()
 
 # POPULATE TABLES
-# ideally shift this to a separate script but for now it's fine
+# ideally shift this into a function
 
 # populate country table
 countries_source = json.load(open('source_data/country.json'))
@@ -139,4 +140,3 @@ for  unit_code, description in units_source.items():
               ''', (unit_code, description)
     )
 conn.commit()
-
