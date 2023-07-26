@@ -2,6 +2,7 @@
 # and populates it with the initial data
 
 import sqlite3
+import json
 
 # drop the tables allowing for a clean resetting of the database
 conn = sqlite3.connect('datastore.db') 
@@ -89,4 +90,53 @@ conn.commit()
 # POPULATE TABLES
 # ideally shift this to a separate script but for now it's fine
 
+# populate country table
+countries_source = json.load(open('source_data/country.json'))
+for  country_code, description in countries_source.items():
+    c.execute('''
+              INSERT INTO country (country_code, description)
+              VALUES (?, ?)
+              ''', (country_code, description)
+    )
+conn.commit()
+
 # populate energy_balance table
+energy_balance_source = json.load(open('source_data/energy_balance.json'))
+for  nrg_bal_code, description in energy_balance_source.items():
+    c.execute('''
+              INSERT INTO energy_balance (nrg_bal_code, description)
+              VALUES (?, ?)
+              ''', (nrg_bal_code, description)
+    )
+conn.commit()
+
+# populate seic table
+seic_source = json.load(open('source_data/seic.json'))
+for  seic_code, description in seic_source.items():
+    c.execute('''
+              INSERT INTO seic (seic_code, description)
+              VALUES (?, ?)
+              ''', (seic_code, description)
+    )
+conn.commit()
+
+# populate year table
+years_source = json.load(open('source_data/year.json'))
+for  year in years_source:
+    c.execute('''
+              INSERT INTO year (year)
+              VALUES (?)
+              ''', (year,)
+    )
+conn.commit()
+
+# populate unit table
+units_source = json.load(open('source_data/unit.json'))
+for  unit_code, description in units_source.items():
+    c.execute('''
+              INSERT INTO unit (unit_code, description)
+              VALUES (?, ?)
+              ''', (unit_code, description)
+    )
+conn.commit()
+
