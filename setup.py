@@ -5,7 +5,9 @@ setup(
     packages=find_packages(),
     install_requires=[
         "dagster",
-        "dagit"
+        "dagit",
+        "numpy<1.23.0",
+        "pandas==2.0.3"
     ],
     extras_require={"dev": []},
 )
