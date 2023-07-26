@@ -1,0 +1,17 @@
+{
+    "TOTAL": "Total",
+    "SFF_P1000_S2000": "Solid fossil fuels, peat, peat products, oil shale and oil sands",
+    "G3000": "Natural gas",
+    "G3200": "Liquefied natural gas",
+    "O4000": "Oil and petroleum products",
+    "O4630": "Liquefied petroleum gases",
+    "O4669": "Other kerosene",
+    "O4671": "Gas oil and diesel oil",
+    "RA000": "Renewables and biofuels",
+    "RA410": "Solar thermal",
+    "RA600": "Ambient heat (heat pumps)",
+    "R5110-5150_W6000RI": "Primary solid biofuels",
+    "R5300": "Biogases",
+    "E7000": "Electricity",
+    "H8000": "Heat"
+}
