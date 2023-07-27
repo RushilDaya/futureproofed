@@ -29,6 +29,8 @@ c.execute('''
           ''')
 conn.commit()
 
+print('Dropped Existing Tables')
+
 # CREATE TABLES
 # turn these into functions which load the schema from a file
 c.execute('''
@@ -88,6 +90,8 @@ c.execute('''
           ''')
 conn.commit()
 
+print('Recreated Tables Successfully')
+
 # POPULATE TABLES
 # ideally shift this into a function
 
@@ -140,3 +144,5 @@ for  unit_code, description in units_source.items():
               ''', (unit_code, description)
     )
 conn.commit()
+
+print('Initialised Tables Successfully')
