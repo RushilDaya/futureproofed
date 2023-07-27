@@ -4,3 +4,4 @@ build/
 application.egg-info/
 *.db
 .vscode/
+__pycache__/

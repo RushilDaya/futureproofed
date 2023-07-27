@@ -3,77 +3,102 @@
 
 import sqlite3
 import json
-from application import (DB_NAME, 
-                         COUNTRY_DATA_JSON, 
-                         ENERGY_BALANCE_DATA_JSON, 
-                         SEIC_DATA_JSON, 
-                         UNIT_DATA_JSON, 
-                         YEAR_DATA_JSON)
+from application import (
+    DB_NAME,
+    COUNTRY_DATA_JSON,
+    ENERGY_BALANCE_DATA_JSON,
+    SEIC_DATA_JSON,
+    UNIT_DATA_JSON,
+    YEAR_DATA_JSON,
+)
 
 # drop the tables allowing for a clean resetting of the database
-conn = sqlite3.connect(DB_NAME) 
+conn = sqlite3.connect(DB_NAME)
 c = conn.cursor()
 
 # turn this into a function
-c.execute('''
+c.execute(
+    """
           DROP TABLE IF EXISTS country
-          ''')
-c.execute('''
+          """
+)
+c.execute(
+    """
           DROP TABLE IF EXISTS seic
-          ''')
-c.execute('''
+          """
+)
+c.execute(
+    """
           DROP TABLE IF EXISTS energy_balance
-          ''')
-c.execute('''
+          """
+)
+c.execute(
+    """
           DROP TABLE IF EXISTS year
-          ''')
-c.execute('''
+          """
+)
+c.execute(
+    """
           DROP TABLE IF EXISTS unit
-          ''')
-c.execute('''
+          """
+)
+c.execute(
+    """
           DROP TABLE IF EXISTS measurement
-          ''')
+          """
+)
 conn.commit()
 
-print('Dropped Existing Tables')
+print("Dropped Existing Tables")
 
 # CREATE TABLES
 # turn these into functions which load the schema from a file
-c.execute('''
+c.execute(
+    """
           CREATE TABLE country (
           country_code varchar(2) NOT NULL,
           description varchar(255) NOT NULL,
           PRIMARY KEY (country_code)
           )
-          ''')
-c.execute('''
+          """
+)
+c.execute(
+    """
           CREATE TABLE energy_balance (
           nrg_bal_code varchar(14) NOT NULL,
           description varchar(255) NOT NULL,
           PRIMARY KEY (nrg_bal_code)
           )
-          ''')
-c.execute('''
+          """
+)
+c.execute(
+    """
           CREATE TABLE seic (
           seic_code varchar(32) NOT NULL,
           description varchar(255) NOT NULL,
           PRIMARY KEY (seic_code)
           )
-          ''')
-c.execute('''
+          """
+)
+c.execute(
+    """
           CREATE TABLE year (
           year INTEGER  NOT NULL,
           PRIMARY KEY (year)
           )
-          ''')
-c.execute('''
+          """
+)
+c.execute(
+    """
           CREATE TABLE unit (
           unit_code varchar(32) NOT NULL,
           description varchar(255) NOT NULL,
           PRIMARY KEY (unit_code)
           )
-          ''')
-c.execute('''
+          """
+)
+c.execute(
+    """
           CREATE TABLE measurement (
           seic_code varchar(32) NOT NULL,
           nrg_bal_code varchar(14) NOT NULL,
@@ -93,62 +118,73 @@ c.execute('''
 
           PRIMARY KEY (seic_code, nrg_bal_code, country_code, year)
           )
-          ''')
+          """
+)
 conn.commit()
 
-print('Recreated Tables Successfully')
+print("Recreated Tables Successfully")
 
 # POPULATE TABLES
 # ideally shift this into a function
 
 # populate country table
 countries_source = json.load(open(COUNTRY_DATA_JSON))
-for  country_code, description in countries_source.items():
-    c.execute('''
+for country_code, description in countries_source.items():
+    c.execute(
+        """
               INSERT INTO country (country_code, description)
               VALUES (?, ?)
-              ''', (country_code, description)
+              """,
+        (country_code, description),
     )
 conn.commit()
 
 # populate energy_balance table
 energy_balance_source = json.load(open(ENERGY_BALANCE_DATA_JSON))
-for  nrg_bal_code, description in energy_balance_source.items():
-    c.execute('''
+for nrg_bal_code, description in energy_balance_source.items():
+    c.execute(
+        """
               INSERT INTO energy_balance (nrg_bal_code, description)
               VALUES (?, ?)
-              ''', (nrg_bal_code, description)
+              """,
+        (nrg_bal_code, description),
     )
 conn.commit()
 
 # populate seic table
 seic_source = json.load(open(SEIC_DATA_JSON))
-for  seic_code, description in seic_source.items():
-    c.execute('''
+for seic_code, description in seic_source.items():
+    c.execute(
+        """
               INSERT INTO seic (seic_code, description)
               VALUES (?, ?)
-              ''', (seic_code, description)
+              """,
+        (seic_code, description),
     )
 conn.commit()
 
 # populate year table
 years_source = json.load(open(YEAR_DATA_JSON))
-for  year in years_source:
-    c.execute('''
+for year in years_source:
+    c.execute(
+        """
               INSERT INTO year (year)
               VALUES (?)
-              ''', (year,)
+              """,
+        (year,),
     )
 conn.commit()
 
 # populate unit table
 units_source = json.load(open(UNIT_DATA_JSON))
-for  unit_code, description in units_source.items():
-    c.execute('''
+for unit_code, description in units_source.items():
+    c.execute(
+        """
               INSERT INTO unit (unit_code, description)
               VALUES (?, ?)
-              ''', (unit_code, description)
+              """,
+        (unit_code, description),
     )
 conn.commit()
 
-print('Initialised Tables Successfully')
+print("Initialised Tables Successfully")
