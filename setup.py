@@ -1,13 +1,10 @@
-from setuptools import find_packages, setup
+"""
+We need to include this file to enable the editable mode:
+'pip install -e .'
+"""
+from setuptools import setup
 
-setup(
-    name="futureproofed",
-    packages=find_packages(),
-    install_requires=[
-        "dagster",
-        "dagit",
-        "numpy<1.23.0",
-        "pandas==2.0.3"
-    ],
-    extras_require={"dev": []},
-)
+setup(package_data = {
+        'application': ['py.typed'],
+    })
+

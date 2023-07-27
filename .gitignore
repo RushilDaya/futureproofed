@@ -1,5 +1,6 @@
 diary.md
 scratch.py
-dist/
-futureproofed.egg-info/
+build/
+application.egg-info/
 *.db
+.vscode/

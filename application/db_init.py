@@ -3,9 +3,15 @@
 
 import sqlite3
 import json
+from application import (DB_NAME, 
+                         COUNTRY_DATA_JSON, 
+                         ENERGY_BALANCE_DATA_JSON, 
+                         SEIC_DATA_JSON, 
+                         UNIT_DATA_JSON, 
+                         YEAR_DATA_JSON)
 
 # drop the tables allowing for a clean resetting of the database
-conn = sqlite3.connect('datastore.db') 
+conn = sqlite3.connect(DB_NAME) 
 c = conn.cursor()
 
 # turn this into a function
@@ -96,7 +102,7 @@ print('Recreated Tables Successfully')
 # ideally shift this into a function
 
 # populate country table
-countries_source = json.load(open('source_data/country.json'))
+countries_source = json.load(open(COUNTRY_DATA_JSON))
 for  country_code, description in countries_source.items():
     c.execute('''
               INSERT INTO country (country_code, description)
@@ -106,7 +112,7 @@ for  country_code, description in countries_source.items():
 conn.commit()
 
 # populate energy_balance table
-energy_balance_source = json.load(open('source_data/energy_balance.json'))
+energy_balance_source = json.load(open(ENERGY_BALANCE_DATA_JSON))
 for  nrg_bal_code, description in energy_balance_source.items():
     c.execute('''
               INSERT INTO energy_balance (nrg_bal_code, description)
@@ -116,7 +122,7 @@ for  nrg_bal_code, description in energy_balance_source.items():
 conn.commit()
 
 # populate seic table
-seic_source = json.load(open('source_data/seic.json'))
+seic_source = json.load(open(SEIC_DATA_JSON))
 for  seic_code, description in seic_source.items():
     c.execute('''
               INSERT INTO seic (seic_code, description)
@@ -126,7 +132,7 @@ for  seic_code, description in seic_source.items():
 conn.commit()
 
 # populate year table
-years_source = json.load(open('source_data/year.json'))
+years_source = json.load(open(YEAR_DATA_JSON))
 for  year in years_source:
     c.execute('''
               INSERT INTO year (year)
@@ -136,7 +142,7 @@ for  year in years_source:
 conn.commit()
 
 # populate unit table
-units_source = json.load(open('source_data/unit.json'))
+units_source = json.load(open(UNIT_DATA_JSON))
 for  unit_code, description in units_source.items():
     c.execute('''
               INSERT INTO unit (unit_code, description)

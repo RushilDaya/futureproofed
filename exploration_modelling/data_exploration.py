@@ -1,7 +1,9 @@
 import pandas as pd 
 
+FILE_PATH = 'source_data/nrg_d_hhq_linear.csv'
+
 # Read in the data
-df = pd.read_csv('source_data/nrg_d_hhq_linear.csv')
+df = pd.read_csv(FILE_PATH)
 print(df.head())
 
 # show the columns
