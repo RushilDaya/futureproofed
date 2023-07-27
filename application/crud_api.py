@@ -2,6 +2,9 @@
 # the user get post put and delete single measurements
 # in the database
 
+# still need to complete this API -> however, moving on to data visualisation
+# first
+
 from flask import Flask, request
 import sqlite3
 from application import DB_NAME
@@ -9,12 +12,7 @@ app = Flask(__name__)
 
 primary_key = ['seic_code', 'nrg_bal_code', 'country_code', 'year']
 
-@app.route('/measurement/', methods=['GET'])
-def getMeasurement():
-    args = request.args.to_dict()
-    assert set(args.keys()) == set(primary_key) # put in proper error handling
-    # get the measurement from the database
-
+def get_measurement(seic_code, nrg_bal_code, country_code, year):
     db_conn = sqlite3.connect(DB_NAME)
     db_cursor = db_conn.cursor()
     db_cursor.execute("""
@@ -25,13 +23,27 @@ def getMeasurement():
                       year = ?
                       """,
                       (
-                            args['seic_code'],
-                            args['nrg_bal_code'],
-                            args['country_code'],
-                            args['year']
+                            seic_code,
+                            nrg_bal_code,
+                            country_code,
+                            year
                       )
     )
     records = db_cursor.fetchall()
+    return records
+
+@app.route('/measurement/', methods=['GET'])
+def getMeasurement():
+    args = request.args.to_dict()
+    assert set(args.keys()) == set(primary_key) # put in proper error handling
+
+    # get the measurement from the database
+    records = get_measurement(
+        args['seic_code'],
+        args['nrg_bal_code'],
+        args['country_code'],
+        args['year']
+    )
 
     response = {}
     if len(records) == 0:
@@ -52,13 +64,6 @@ def getMeasurement():
         }
     return response
 
-
-
-
-    
-
-
-    return 
 
 @app.route('/measurement/', methods=['PUT'])
 def updateMeasurement():
