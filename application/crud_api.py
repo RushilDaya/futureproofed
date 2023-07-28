@@ -4,7 +4,7 @@
 from flask import Flask, request
 import sqlite3
 from application import DB_NAME
-from application.data_models.object_models import get_measurement_from_db
+from application.data_models.object_models import get_measurement_from_db, load_record, Measurement
 
 app = Flask(__name__)
 
@@ -38,7 +38,34 @@ def updateMeasurement():
 
 @app.route("/measurement/", methods=["POST"])
 def postMeasurement():
-    return "Hello, World!"
+    body = request.json
+
+    # check for existing measurement
+    db_conn = sqlite3.connect(DB_NAME)
+    db_cursor = db_conn.cursor()
+    existing_measurement = get_measurement_from_db(
+        body["seic_code"], body["nrg_bal_code"], body["country_code"], body["year"], db_cursor
+    )
+    if existing_measurement is not None:
+        response = {"status": "409"}
+        return response
+    
+    incoming_measurement = Measurement(
+        seic_code=body["seic_code"],
+        nrg_bal_code=body["nrg_bal_code"],
+        country_code=body["country_code"],
+        year=body["year"],
+        measurement_value=float(body["measurement_value"]),
+        measurement_unit=body["measurement_unit"],
+        standardised_measurement_value=body.get("standardised_measurement_value"),
+        standardised_measurement_unit=body.get("standardised_measurement_unit"),
+    )
+
+    # load the record into the database
+    load_record(incoming_measurement, db_cursor, db_conn)
+    response = {"status": "200"}
+    return response
+
 
 
 @app.route("/measurement/", methods=["DELETE"])
