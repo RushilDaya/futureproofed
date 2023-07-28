@@ -4,7 +4,7 @@ import sqlite3
 from click import progressbar
 
 from application import DB_NAME, MEASUREMENT_DATA_CSV, STANDARD_UNIT
-from application.data_models.object_models import Measurement
+from application.data_models.object_models import create_measurement_object_from_csv_row, Measurement
 
 
 # generator to supply data values (simulate a streaming data source)
@@ -19,20 +19,6 @@ def data_generator(source_file) -> List:
         next(csv_reader)  # skip header
         for row in csv_reader:
             yield row
-
-
-def create_measurement_object(raw_measurement: List[str]) -> Measurement:
-    # should make this a configuration instead of hardcoding
-    return Measurement(
-        seic_code=raw_measurement[4],
-        nrg_bal_code=raw_measurement[3],
-        country_code=raw_measurement[6],
-        year=raw_measurement[7],
-        measurement_value=float(raw_measurement[8]),
-        measurent_unit=raw_measurement[5],
-        standardised_measurement_value=None,
-        standardised_measurement_unit=None,
-    )
 
 
 def transform_fill_standardised_values(measurement: Measurement) -> Measurement:
@@ -126,7 +112,7 @@ def load_record(measurement: Measurement, db_cursor: Any, db_conn: Any) -> bool:
 
 
 def etl_row(raw_measurement: List[str], db_cursor: Any, db_conn: Any) -> bool:
-    measurement = create_measurement_object(raw_measurement)
+    measurement = create_measurement_object_from_csv_row(raw_measurement)
     measurement = transform_fill_standardised_values(measurement)
     measurement = transform_merge_with_existing_measurement(measurement, db_cursor)
     load_record(measurement, db_cursor, db_conn)
