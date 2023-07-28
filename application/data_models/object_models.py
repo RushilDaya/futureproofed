@@ -84,3 +84,35 @@ def get_measurement_from_db(seic_code, nrg_bal_code, country_code, year, db_curs
         standardised_measurement_value=record[db_ob_map["standardised_measurement_value"]],
         standardised_measurement_unit=record[db_ob_map["standardised_measurement_unit"]],
     )
+
+def load_record(measurement: Measurement, db_cursor, db_conn) -> bool:
+    # this load function essentially does the following logic
+    # does an insert or replace thus the measurement provided is the source of truth
+    # if the measurement is already in the database, it will be replaced as it is assumed
+    # to be the same / or less complete than the incoming measurement
+
+    db_cursor.execute(
+        """
+            INSERT OR REPLACE INTO 
+            measurement (seic_code, 
+                         nrg_bal_code, 
+                         country_code, year, 
+                         measurement_value, 
+                         measurement_unit, 
+                         standardised_measurement_value, 
+                         standardised_measurement_unit)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            measurement.seic_code,
+            measurement.nrg_bal_code,
+            measurement.country_code,
+            measurement.year,
+            measurement.measurement_value,
+            measurement.measurent_unit,
+            measurement.standardised_measurement_value,
+            measurement.standardised_measurement_unit,      
+        ),
+    )
+    db_conn.commit()
+    return True

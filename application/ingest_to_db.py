@@ -7,6 +7,7 @@ from application import DB_NAME, MEASUREMENT_DATA_CSV, STANDARD_UNIT
 from application.data_models.object_models import (
     create_measurement_object_from_csv_row,
     Measurement,
+    load_record
 )
 from application.etl_utils.transformers import (
     fill_standardised_values,
@@ -25,44 +26,6 @@ def data_generator(source_file) -> List:
         next(csv_reader)  # skip header
         for row in csv_reader:
             yield row
-
-
-def load_record(measurement: Measurement, db_cursor: Any, db_conn: Any) -> bool:
-    # load the record into the database
-    db_cursor.execute(
-        """
-                      DELETE FROM measurement where 
-                        seic_code = ? and   
-                        nrg_bal_code = ? and
-                        country_code = ? and
-                        year = ?
-                        """,
-        (
-            measurement.seic_code,
-            measurement.nrg_bal_code,
-            measurement.country_code,
-            measurement.year,
-        ),
-    )
-
-    db_cursor.execute(
-        """
-              INSERT INTO measurement (seic_code, nrg_bal_code, country_code, year, measurement_value, measurement_unit, standardised_measurement_value, standardised_measurement_unit)
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-              """,
-        (
-            measurement.seic_code,
-            measurement.nrg_bal_code,
-            measurement.country_code,
-            measurement.year,
-            measurement.measurement_value,
-            measurement.measurent_unit,
-            measurement.standardised_measurement_value,
-            measurement.standardised_measurement_unit,
-        ),
-    )
-    db_conn.commit()
-    return True
 
 
 def etl_row(raw_measurement: List[str], db_cursor: Any, db_conn: Any) -> bool:
