@@ -4,7 +4,12 @@
 from flask import Flask, request
 import sqlite3
 from application import DB_NAME
-from application.data_models.object_models import get_measurement_from_db, load_record, Measurement
+from application.data_models.object_models import (
+    remove_from_db,
+    get_measurement_from_db,
+    load_record,
+    Measurement,
+)
 
 app = Flask(__name__)
 
@@ -49,7 +54,7 @@ def postMeasurement():
     if existing_measurement is not None:
         response = {"status": "409"}
         return response
-    
+
     incoming_measurement = Measurement(
         seic_code=body["seic_code"],
         nrg_bal_code=body["nrg_bal_code"],
@@ -67,10 +72,24 @@ def postMeasurement():
     return response
 
 
-
 @app.route("/measurement/", methods=["DELETE"])
 def deleteMeasurement():
-    return "Hello, World!"
+    args = request.args.to_dict()
+    # check that the request contains all the required arguments / needs better error handling
+    assert set(args.keys()) == set(["seic_code", "nrg_bal_code", "country_code", "year"])
+
+    db_conn = sqlite3.connect(DB_NAME)
+    db_cursor = db_conn.cursor()
+    measurement = get_measurement_from_db(
+        args["seic_code"], args["nrg_bal_code"], args["country_code"], args["year"], db_cursor
+    )
+    if measurement is None:
+        response = {"status": "404"}
+        return response
+    remove_from_db(measurement, db_cursor, db_conn)
+
+    response = {"status": "200"}
+    return response
 
 
 if __name__ == "__main__":

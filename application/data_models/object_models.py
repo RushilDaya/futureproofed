@@ -128,3 +128,22 @@ def load_record(measurement: Measurement, db_cursor, db_conn) -> bool:
     )
     db_conn.commit()
     return True
+
+def remove_from_db(measurement:Measurement, db_cursor, db_conn) -> None:
+    db_cursor.execute(
+        """
+              DELETE FROM measurement where
+                seic_code = ? and
+                nrg_bal_code = ? and
+                country_code = ? and
+                year = ?
+        """,
+        (
+            measurement.seic_code,
+            measurement.nrg_bal_code,
+            measurement.country_code,
+            measurement.year,
+        ),
+    )
+    db_conn.commit()
+    return None
