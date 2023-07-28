@@ -1,11 +1,16 @@
-from dataclasses import dataclass
 import csv
-from typing import List, Optional, Any
+from typing import List, Any
 import sqlite3
+from click import progressbar
 
 from application import DB_NAME, MEASUREMENT_DATA_CSV, STANDARD_UNIT
+from application.data_models.object_models import Measurement
+
 
 # generator to supply data values (simulate a streaming data source)
+# this approach is used to avoid loading the entire file into memory
+# and is simple to understand
+# However, it is slow - not a big issue for this use case but can be improved
 
 
 def data_generator(source_file) -> List:
@@ -14,18 +19,6 @@ def data_generator(source_file) -> List:
         next(csv_reader)  # skip header
         for row in csv_reader:
             yield row
-
-
-@dataclass
-class Measurement:
-    seic_code: str
-    nrg_bal_code: str
-    country_code: str
-    year: int
-    measurement_value: float
-    measurent_unit: str
-    standardised_measurement_value: Optional[float]
-    standardised_measurement_unit: Optional[str]
 
 
 def create_measurement_object(raw_measurement: List[str]) -> Measurement:
@@ -133,8 +126,6 @@ def load_record(measurement: Measurement, db_cursor: Any, db_conn: Any) -> bool:
 
 
 def etl_row(raw_measurement: List[str], db_cursor: Any, db_conn: Any) -> bool:
-    # as the operations is quite simple
-    # combining the extract, transform and load into one function
     measurement = create_measurement_object(raw_measurement)
     measurement = transform_fill_standardised_values(measurement)
     measurement = transform_merge_with_existing_measurement(measurement, db_cursor)
@@ -145,8 +136,15 @@ if __name__ == "__main__":
     db_conn = sqlite3.connect(DB_NAME)
     db_cursor = db_conn.cursor()
 
-    counter = 0
-    for record in data_generator(MEASUREMENT_DATA_CSV):
-        print(counter)
-        counter += 1
-        etl_row(record, db_cursor, db_conn)
+    # ingesting one row at a time is not a very fast approach
+    # however, it is simple to understand the transformations being applied
+    # and sufficient for this use case -> can be optimized if needed
+
+    # hard coding the length of the data source file here: purely for
+    # understanding the progress - not the most elegant solution
+
+    with progressbar(
+        data_generator(MEASUREMENT_DATA_CSV), label="ingesting rows", length=27899
+    ) as bar:
+        for record in bar:
+            etl_row(record, db_cursor, db_conn)
