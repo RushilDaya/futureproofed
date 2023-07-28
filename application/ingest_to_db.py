@@ -3,10 +3,9 @@ from typing import List, Any
 import sqlite3
 from click import progressbar
 
-from application import DB_NAME, MEASUREMENT_DATA_CSV, STANDARD_UNIT
+from application import DB_NAME, MEASUREMENT_DATA_CSV
 from application.data_models.object_models import (
     create_measurement_object_from_csv_row,
-    Measurement,
     load_record
 )
 from application.etl_utils.transformers import (

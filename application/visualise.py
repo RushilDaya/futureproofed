@@ -47,9 +47,12 @@ fig = px.bar(
     color="nrg_bal_code",
     barmode="stack",
     facet_row="year",
-    facet_row_spacing=0.01,
+    facet_row_spacing=0.02,
     height=10000
 )
 fig.update_xaxes(showticklabels=True)
-fig.update_yaxes(title=f"Total energy usage in {STANDARD_UNIT}")	
+fig.update_yaxes(title=f"Total energy usage in {STANDARD_UNIT}")
+fig.update_layout(legend=dict(
+    orientation="h"
+))
 fig.show()
