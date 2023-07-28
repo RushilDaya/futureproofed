@@ -8,9 +8,21 @@ class Measurement:
     country_code: str
     year: int
     measurement_value: float
-    measurent_unit: str
+    measurement_unit: str
     standardised_measurement_value: Optional[float]
     standardised_measurement_unit: Optional[str]
+
+    def pretty(self) -> dict:
+        return {
+            "seic_code": self.seic_code,
+            "nrg_bal_code": self.nrg_bal_code,
+            "country_code": self.country_code,
+            "year": self.year,
+            "measurement_value": self.measurement_value,
+            "measurement_unit": self.measurement_unit,
+            "standardised_measurement_value": self.standardised_measurement_value,
+            "standardised_measurement_unit": self.standardised_measurement_unit
+        }
 
 # this is a configuration object:
 # it maps the csv columns in the source to the object attributes
@@ -46,7 +58,7 @@ def create_measurement_object_from_csv_row(raw_measurement: List[str]) -> Measur
         country_code=raw_measurement[csv_ob_map["country_code"]],
         year=raw_measurement[csv_ob_map["year"]],
         measurement_value=float(raw_measurement[csv_ob_map["measurement_value"]]),
-        measurent_unit=raw_measurement[csv_ob_map["measurement_unit"]],
+        measurement_unit=raw_measurement[csv_ob_map["measurement_unit"]],
         standardised_measurement_value=None,
         standardised_measurement_unit=None,
     )
@@ -80,7 +92,7 @@ def get_measurement_from_db(seic_code, nrg_bal_code, country_code, year, db_curs
         country_code=record[db_ob_map["country_code"]],
         year=record[db_ob_map["year"]],
         measurement_value=record[db_ob_map["measurement_value"]],
-        measurent_unit=record[db_ob_map["measurement_unit"]],
+        measurement_unit=record[db_ob_map["measurement_unit"]],
         standardised_measurement_value=record[db_ob_map["standardised_measurement_value"]],
         standardised_measurement_unit=record[db_ob_map["standardised_measurement_unit"]],
     )
@@ -109,7 +121,7 @@ def load_record(measurement: Measurement, db_cursor, db_conn) -> bool:
             measurement.country_code,
             measurement.year,
             measurement.measurement_value,
-            measurement.measurent_unit,
+            measurement.measurement_unit,
             measurement.standardised_measurement_value,
             measurement.standardised_measurement_unit,      
         ),

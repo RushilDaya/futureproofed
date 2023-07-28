@@ -1,67 +1,35 @@
-# crud api for the application allowing
-# the user get post put and delete single measurements
-# in the database
-
-# still need to complete this API -> however, moving on to data visualisation
-# first
+# Description: This file contains the CRUD API for the measurement table
+#              It is used to get, update, post and delete measurements 
 
 from flask import Flask, request
 import sqlite3
 from application import DB_NAME
+from application.data_models.object_models import get_measurement_from_db
 app = Flask(__name__)
-
-primary_key = ['seic_code', 'nrg_bal_code', 'country_code', 'year']
-
-def get_measurement(seic_code, nrg_bal_code, country_code, year):
-    db_conn = sqlite3.connect(DB_NAME)
-    db_cursor = db_conn.cursor()
-    db_cursor.execute("""
-              SELECT * FROM measurement where
-                      seic_code = ? and
-                      nrg_bal_code = ? and
-                      country_code = ? and
-                      year = ?
-                      """,
-                      (
-                            seic_code,
-                            nrg_bal_code,
-                            country_code,
-                            year
-                      )
-    )
-    records = db_cursor.fetchall()
-    return records
 
 @app.route('/measurement/', methods=['GET'])
 def getMeasurement():
     args = request.args.to_dict()
-    assert set(args.keys()) == set(primary_key) # put in proper error handling
+    # check that the request contains all the required arguments / needs better error handling
+    assert set(args.keys()) == set(['seic_code', 'nrg_bal_code', 'country_code', 'year']) 
 
+    db_conn = sqlite3.connect(DB_NAME)
+    db_cursor = db_conn.cursor()
     # get the measurement from the database
-    records = get_measurement(
+    measurement = get_measurement_from_db(
         args['seic_code'],
         args['nrg_bal_code'],
         args['country_code'],
-        args['year']
+        args['year'],
+        db_cursor
     )
 
     response = {}
-    if len(records) == 0:
+    if measurement is None:
         response['status'] = '404'
-    if len(records) > 1:
-        response['status'] = '500'
-    if  len(records) == 1:
+    else:
         response['status'] = '200'
-        response['res'] = {
-            'seic_code': records[0][0],
-            'nrg_bal_code': records[0][1],
-            'country_code': records[0][2],
-            'year': records[0][3],
-            'measurement_value': records[0][4],
-            'measurement_unit': records[0][5],
-            'standardised_measurement_value': records[0][6],
-            'standardised_measurement_unit': records[0][7]
-        }
+        response['res'] = measurement.pretty()
     return response
 
 

@@ -3,9 +3,9 @@ from application import STANDARD_UNIT
 
 
 def fill_standardised_values(measurement: Measurement) -> Measurement:
-    if measurement.measurent_unit == STANDARD_UNIT:
+    if measurement.measurement_unit == STANDARD_UNIT:
         measurement.standardised_measurement_value = measurement.measurement_value
-        measurement.standardised_measurement_unit = measurement.measurent_unit
+        measurement.standardised_measurement_unit = measurement.measurement_unit
     return measurement
 
 
@@ -31,11 +31,11 @@ def merge_with_existing_measurement(measurement: Measurement, db_cursor) -> Meas
         measurement.standardised_measurement_value = existing_record.standardised_measurement_value
         measurement.standardised_measurement_unit = existing_record.standardised_measurement_unit
 
-    if measurement.measurent_unit == STANDARD_UNIT:
+    if measurement.measurement_unit == STANDARD_UNIT:
         # if the the measurement we are currently loading has the standard unit
         # it means that it is possibly not the original measurement
-        if existing_record.measurent_unit != STANDARD_UNIT:
+        if existing_record.measurement_unit != STANDARD_UNIT:
             measurement.measurement_value = existing_record.measurement_value
-            measurement.measurent_unit = existing_record.measurent_unit
+            measurement.measurement_unit = existing_record.measurement_unit
 
     return measurement
