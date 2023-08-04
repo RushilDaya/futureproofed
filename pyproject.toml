@@ -9,6 +9,7 @@ dependencies = [
         "click",
         "fastapi[all]",
         "uvicorn",
+        pydantic
 ]
 
 
