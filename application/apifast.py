@@ -4,7 +4,7 @@ import sqlite3
 from enum import Enum
 import json
 from typing import List, Optional
-from application.data_models.object_models import get_measurement_from_db, Measurement, load_record
+from application.data_models.object_models import get_measurement_from_db, Measurement, load_record, remove_from_db
 from application import (
     DB_NAME,
     ENERGY_BALANCE_DATA_JSON,
@@ -55,8 +55,9 @@ def getMeasurement(
     measurement = get_measurement_from_db(
         seic_code.value, nrg_bal_code.value, country_code.value, int(year.value), db_cursor
     )
-    if measurement == None:
+    if measurement is None:
         response.status_code = status.HTTP_404_NOT_FOUND
+        return
     return measurement.pretty()
 
 @app.put("/measurement", status_code=status.HTTP_200_OK)
@@ -113,4 +114,29 @@ def createMeasurement(body: MeasurementBody, response: Response):
         standardised_measurement_unit=body.standardised_measurement_unit
     )
     load_record(incoming_measurement, db_cursor, db_conn)
+    return
+
+@app.delete("/measurement", status_code=status.HTTP_200_OK)
+def deleteMeasurement(
+    seic_code: SEIC_CODES_ENUM,
+    nrg_bal_code: NRG_BAL_CODES_ENUM,
+    country_code: COUNTRY_CODES_ENUM,
+    year: YEARS_ENUM,
+    response: Response,
+):
+    db_conn = sqlite3.connect(DB_NAME)
+    db_cursor = db_conn.cursor()
+
+    measurement = get_measurement_from_db(
+        seic_code.value,
+        nrg_bal_code.value,
+        country_code.value,
+        int(year.value),
+        db_cursor
+    )
+    if measurement == None:
+        response.status_code = status.HTTP_404_NOT_FOUND
+        return
+    
+    remove_from_db(measurement, db_cursor, db_conn)
     return
