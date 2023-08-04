@@ -1,6 +1,6 @@
 from typing import Optional, List
 from dataclasses import dataclass
-
+from application  import DatabaseObject
 
 @dataclass
 class Measurement:
@@ -68,9 +68,9 @@ def create_measurement_object_from_csv_row(raw_measurement: List[str]) -> Measur
 
 
 def get_measurement_from_db(
-    seic_code: str, nrg_bal_code: str, country_code: str, year: int, db_cursor
+    seic_code: str, nrg_bal_code: str, country_code: str, year: int, db: DatabaseObject
 ) -> Optional[Measurement]:
-    db_cursor.execute(
+    db.db_cursor.execute(
         """
               SELECT * FROM measurement where
                 seic_code = ? and
@@ -85,7 +85,7 @@ def get_measurement_from_db(
             year,
         ),
     )
-    records = db_cursor.fetchall()
+    records = db.db_cursor.fetchall()
     if len(records) > 1:
         raise ValueError("More than one record found for the same PK")
     if len(records) == 0:
@@ -104,13 +104,13 @@ def get_measurement_from_db(
     )
 
 
-def load_record(measurement: Measurement, db_cursor, db_conn) -> bool:
+def load_record(measurement: Measurement, db: DatabaseObject) -> bool:
     # this load function essentially does the following logic
     # does an insert or replace thus the measurement provided is the source of truth
     # if the measurement is already in the database, it will be replaced as it is assumed
     # to be the same / or less complete than the incoming measurement
 
-    db_cursor.execute(
+    db.db_cursor.execute(
         """
             INSERT OR REPLACE INTO 
             measurement (seic_code, 
@@ -133,12 +133,12 @@ def load_record(measurement: Measurement, db_cursor, db_conn) -> bool:
             measurement.standardised_measurement_unit,
         ),
     )
-    db_conn.commit()
+    db.db_conn.commit()
     return True
 
 
-def remove_from_db(measurement: Measurement, db_cursor, db_conn) -> None:
-    db_cursor.execute(
+def remove_from_db(measurement: Measurement, db: DatabaseObject) -> None:
+    db.db_cursor.execute(
         """
               DELETE FROM measurement where
                 seic_code = ? and
@@ -153,5 +153,5 @@ def remove_from_db(measurement: Measurement, db_cursor, db_conn) -> None:
             measurement.year,
         ),
     )
-    db_conn.commit()
+    db.db_conn.commit()
     return None

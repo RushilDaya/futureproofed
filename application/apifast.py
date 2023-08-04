@@ -4,9 +4,14 @@ import sqlite3
 from enum import Enum
 import json
 from typing import List, Optional
-from application.data_models.object_models import get_measurement_from_db, Measurement, load_record, remove_from_db
+from application.data_models.object_models import (
+    get_measurement_from_db,
+    Measurement,
+    load_record,
+    remove_from_db
+)
 from application import (
-    DB_NAME,
+    db_instance,
     ENERGY_BALANCE_DATA_JSON,
     COUNTRY_DATA_JSON,
     SEIC_DATA_JSON,
@@ -49,11 +54,8 @@ def getMeasurement(
     year: YEARS_ENUM,
     response: Response,
 ):
-    db_conn = sqlite3.connect(DB_NAME)
-    db_cursor = db_conn.cursor()
-
     measurement = get_measurement_from_db(
-        seic_code.value, nrg_bal_code.value, country_code.value, int(year.value), db_cursor
+        seic_code.value, nrg_bal_code.value, country_code.value, int(year.value), db_instance
     )
     if measurement is None:
         response.status_code = status.HTTP_404_NOT_FOUND
@@ -62,14 +64,12 @@ def getMeasurement(
 
 @app.put("/measurement", status_code=status.HTTP_200_OK)
 def updateMeasurement(body: MeasurementBody, response: Response):
-    db_conn = sqlite3.connect(DB_NAME)
-    db_cursor = db_conn.cursor()
     existing_measurement = get_measurement_from_db(
         body.seic_code.value, 
         body.nrg_bal_code.value, 
         body.country_code.value, 
         int(body.year.value), 
-        db_cursor
+        db_instance
     )
     if existing_measurement is None:
         response.status_code = status.HTTP_404_NOT_FOUND
@@ -85,19 +85,17 @@ def updateMeasurement(body: MeasurementBody, response: Response):
         standardised_measurement_value=body.standardised_measurement_value,
         standardised_measurement_unit=body.standardised_measurement_unit
     )
-    load_record(incoming_measurement, db_cursor, db_conn)
+    load_record(incoming_measurement, db_instance)
     return
 
 @app.post("/measurement", status_code=status.HTTP_200_OK)
 def createMeasurement(body: MeasurementBody, response: Response):
-    db_conn = sqlite3.connect(DB_NAME)
-    db_cursor = db_conn.cursor()
     existing_measurement = get_measurement_from_db(
         body.seic_code.value, 
         body.nrg_bal_code.value, 
         body.country_code.value, 
         int(body.year.value), 
-        db_cursor
+        db_instance
     )
     if existing_measurement is not  None:
         response.status_code = status.HTTP_409_CONFLICT
@@ -113,7 +111,7 @@ def createMeasurement(body: MeasurementBody, response: Response):
         standardised_measurement_value=body.standardised_measurement_value,
         standardised_measurement_unit=body.standardised_measurement_unit
     )
-    load_record(incoming_measurement, db_cursor, db_conn)
+    load_record(incoming_measurement, db_instance)
     return
 
 @app.delete("/measurement", status_code=status.HTTP_200_OK)
@@ -124,19 +122,16 @@ def deleteMeasurement(
     year: YEARS_ENUM,
     response: Response,
 ):
-    db_conn = sqlite3.connect(DB_NAME)
-    db_cursor = db_conn.cursor()
-
     measurement = get_measurement_from_db(
         seic_code.value,
         nrg_bal_code.value,
         country_code.value,
         int(year.value),
-        db_cursor
+        db_instance
     )
     if measurement == None:
         response.status_code = status.HTTP_404_NOT_FOUND
         return
     
-    remove_from_db(measurement, db_cursor, db_conn)
+    remove_from_db(measurement, db_instance)
     return
