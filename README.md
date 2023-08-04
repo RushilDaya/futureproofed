@@ -18,11 +18,13 @@ After initialising a database, the source dataset (located in ./source_data) can
 python application/ingest_to_db.py
 ```
 ### 3. crud api
-A Flask API can be started by running the following command
+A fastapi API can be started by running the following command
 ```
-python application/crud_api.py
+ python3 -m uvicorn  main:app --reload
 ```
-the created api will be available at http://127.0.0.1:5000
+the created api will be available at http://127.0.0.1:8000
+swagger documentation available at http://127.0.0.1:8000/docs
+redoc documentations available at http://127.0.0.1:8000/redoc
 
 
 ### 4. visualisation
@@ -49,14 +51,14 @@ The model reflects the structure of the source dataset, however the following de
     - note: we cannot automatically convert between units in all cases as the transform between certain unit pairs seems non-trivial thus we need to store the standardised units as distinct values even though it seems like a duplication of data
 
 ## Flask API usage
-when the flask server is running a single endpoint is made available namely:
+when the fastapi server is running a single endpoint is made available namely:
 ```
-http://127.0.0.1:5000/measurement  (METHODS:GET,PUT,POST,DELETE)
+http://127.0.0.1:8000/measurement  (METHODS:GET,PUT,POST,DELETE)
 ```
 #### GET
 example  request:
 ```
-http://127.0.0.1:5000/measurement?country_code=AL&seic_code=E7000&nrg_bal_code=FC_OTH_HH_E&year=2010
+http://127.0.0.1:8000/measurement?country_code=AL&seic_code=E7000&nrg_bal_code=FC_OTH_HH_E&year=2010
 ```
 example response:
 ```json
@@ -77,7 +79,7 @@ example response:
 ```
 #### PUT
 ```
-http://127.0.0.1:5000/measurement
+http://127.0.0.1:8000/measurement
 ```
 with json body
 ```json
@@ -94,7 +96,7 @@ with json body
 ```
 #### POST
 ```
-http://127.0.0.1:5000/measurement
+http://127.0.0.1:8000/measurement
 ```
 with json body
 ```json
@@ -112,7 +114,7 @@ with json body
 #### DELETE
 example request
 ```
-http://127.0.0.1:5000/measurement?country_code=AL&seic_code=E7000&nrg_bal_code=FC_OTH_HH_E&year=2010
+http://127.0.0.1:8000/measurement?country_code=AL&seic_code=E7000&nrg_bal_code=FC_OTH_HH_E&year=2010
 ```
 
 
@@ -122,6 +124,6 @@ http://127.0.0.1:5000/measurement?country_code=AL&seic_code=E7000&nrg_bal_code=F
 - Enrich dataset with external data to fill gaps
 - speed up data ingestion step. Currently ingesting rows sequentially -> this can be optimized
 - add additional CRUD enpoints for non-measurement tables + less constrained GETS for measurements
-- data integrity/validity checks in the API
+- data integrity/validity checks in the API (done)
 - additional visualisations 
 
