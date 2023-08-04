@@ -1,5 +1,6 @@
 from typing import Optional, List
 from dataclasses import dataclass
+from application  import DatabaseObject
 
 @dataclass
 class Measurement:
@@ -21,34 +22,36 @@ class Measurement:
             "measurement_value": self.measurement_value,
             "measurement_unit": self.measurement_unit,
             "standardised_measurement_value": self.standardised_measurement_value,
-            "standardised_measurement_unit": self.standardised_measurement_unit
+            "standardised_measurement_unit": self.standardised_measurement_unit,
         }
+
 
 # this is a configuration object:
 # it maps the csv columns in the source to the object attributes
 # should be moved out of the code
 # this is not very robust as it is quite "far" from the csv file ingestion point
 csv_ob_map = {
-    "seic_code":4,
-    "nrg_bal_code":3,
-    "country_code":6,
-    "year":7,
-    "measurement_value":8,
-    "measurement_unit":5
+    "seic_code": 4,
+    "nrg_bal_code": 3,
+    "country_code": 6,
+    "year": 7,
+    "measurement_value": 8,
+    "measurement_unit": 5,
 }
 
 # order of columns in the database measurements table to map to the object
 # not very elegant, improvement would be to use a proper ORM (sqlalchemy) for this instead
 db_ob_map = {
-    "seic_code":0,
-    "nrg_bal_code":1,
-    "country_code":2,
-    "year":3,
-    "measurement_value":4,
-    "measurement_unit":5,
-    "standardised_measurement_value":6,
-    "standardised_measurement_unit":7
+    "seic_code": 0,
+    "nrg_bal_code": 1,
+    "country_code": 2,
+    "year": 3,
+    "measurement_value": 4,
+    "measurement_unit": 5,
+    "standardised_measurement_value": 6,
+    "standardised_measurement_unit": 7,
 }
+
 
 def create_measurement_object_from_csv_row(raw_measurement: List[str]) -> Measurement:
     # should make this a configuration instead of hardcoding
@@ -63,8 +66,11 @@ def create_measurement_object_from_csv_row(raw_measurement: List[str]) -> Measur
         standardised_measurement_unit=None,
     )
 
-def get_measurement_from_db(seic_code, nrg_bal_code, country_code, year, db_cursor) -> Optional[Measurement]:
-    db_cursor.execute(
+
+def get_measurement_from_db(
+    seic_code: str, nrg_bal_code: str, country_code: str, year: int, db: DatabaseObject
+) -> Optional[Measurement]:
+    db.db_cursor.execute(
         """
               SELECT * FROM measurement where
                 seic_code = ? and
@@ -79,12 +85,12 @@ def get_measurement_from_db(seic_code, nrg_bal_code, country_code, year, db_curs
             year,
         ),
     )
-    records = db_cursor.fetchall()
+    records = db.db_cursor.fetchall()
     if len(records) > 1:
         raise ValueError("More than one record found for the same PK")
     if len(records) == 0:
-        return None 
-    
+        return None
+
     record = records[0]
     return Measurement(
         seic_code=record[db_ob_map["seic_code"]],
@@ -97,13 +103,14 @@ def get_measurement_from_db(seic_code, nrg_bal_code, country_code, year, db_curs
         standardised_measurement_unit=record[db_ob_map["standardised_measurement_unit"]],
     )
 
-def load_record(measurement: Measurement, db_cursor, db_conn) -> bool:
+
+def load_record(measurement: Measurement, db: DatabaseObject) -> bool:
     # this load function essentially does the following logic
     # does an insert or replace thus the measurement provided is the source of truth
     # if the measurement is already in the database, it will be replaced as it is assumed
     # to be the same / or less complete than the incoming measurement
 
-    db_cursor.execute(
+    db.db_cursor.execute(
         """
             INSERT OR REPLACE INTO 
             measurement (seic_code, 
@@ -123,14 +130,15 @@ def load_record(measurement: Measurement, db_cursor, db_conn) -> bool:
             measurement.measurement_value,
             measurement.measurement_unit,
             measurement.standardised_measurement_value,
-            measurement.standardised_measurement_unit,      
+            measurement.standardised_measurement_unit,
         ),
     )
-    db_conn.commit()
+    db.db_conn.commit()
     return True
 
-def remove_from_db(measurement:Measurement, db_cursor, db_conn) -> None:
-    db_cursor.execute(
+
+def remove_from_db(measurement: Measurement, db: DatabaseObject) -> None:
+    db.db_cursor.execute(
         """
               DELETE FROM measurement where
                 seic_code = ? and
@@ -145,5 +153,5 @@ def remove_from_db(measurement:Measurement, db_cursor, db_conn) -> None:
             measurement.year,
         ),
     )
-    db_conn.commit()
+    db.db_conn.commit()
     return None

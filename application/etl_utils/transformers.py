@@ -1,4 +1,5 @@
 from application.data_models.object_models import Measurement, get_measurement_from_db
+from application import DatabaseObject
 from application import STANDARD_UNIT
 
 
@@ -9,7 +10,7 @@ def fill_standardised_values(measurement: Measurement) -> Measurement:
     return measurement
 
 
-def merge_with_existing_measurement(measurement: Measurement, db_cursor) -> Measurement:
+def merge_with_existing_measurement(measurement: Measurement, db: DatabaseObject) -> Measurement:
     # a single loaded measurement may not consistute a complete measurement
     # as in the raw file a measurement can be split into multiple rows based on the unit
 
@@ -18,7 +19,7 @@ def merge_with_existing_measurement(measurement: Measurement, db_cursor) -> Meas
         measurement.nrg_bal_code,
         measurement.country_code,
         measurement.year,
-        db_cursor,
+        db,
     )
 
     if existing_record is None:

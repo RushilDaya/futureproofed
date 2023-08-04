@@ -4,12 +4,11 @@ import plotly.express as px
 import pandas as pd
 import sqlite3
 import json
-from application import DB_NAME, STANDARD_UNIT, COUNTRY_DATA_JSON, ENERGY_BALANCE_DATA_JSON
+from application import db_instance, STANDARD_UNIT, COUNTRY_DATA_JSON, ENERGY_BALANCE_DATA_JSON
 
 # Connect to database
-conn = sqlite3.connect(DB_NAME)
-df = pd.read_sql_query("SELECT * FROM measurement", conn)
-conn.close()
+df = pd.read_sql_query("SELECT * FROM measurement", db_instance.db_conn)
+db_instance.db_conn.close()
 
 # remove measures for which we don't have standardised units available
 # as we  cannot compare them

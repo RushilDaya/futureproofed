@@ -9,3 +9,12 @@ MEASUREMENT_DATA_CSV = 'source_data/nrg_d_hhq_linear.csv'
 
 STANDARD_UNIT = 'TJ' # based on knowledge of the measurement data -> TJ is the standardised unit for comparison
 
+import sqlite3
+
+class DatabaseObject():
+    def __init__(self, db_name: str):
+        self.db_name = db_name
+        self.db_conn = sqlite3.connect(self.db_name, check_same_thread=False)
+        self.db_cursor = self.db_conn.cursor()
+
+db_instance = DatabaseObject(DB_NAME)
