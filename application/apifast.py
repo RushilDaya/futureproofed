@@ -86,3 +86,31 @@ def updateMeasurement(body: MeasurementBody, response: Response):
     )
     load_record(incoming_measurement, db_cursor, db_conn)
     return
+
+@app.post("/measurement", status_code=status.HTTP_200_OK)
+def createMeasurement(body: MeasurementBody, response: Response):
+    db_conn = sqlite3.connect(DB_NAME)
+    db_cursor = db_conn.cursor()
+    existing_measurement = get_measurement_from_db(
+        body.seic_code.value, 
+        body.nrg_bal_code.value, 
+        body.country_code.value, 
+        int(body.year.value), 
+        db_cursor
+    )
+    if existing_measurement is not  None:
+        response.status_code = status.HTTP_409_CONFLICT
+        return
+    
+    incoming_measurement = Measurement(
+        seic_code=body.seic_code.value,
+        nrg_bal_code=body.nrg_bal_code.value,
+        country_code=body.country_code.value,
+        year=int(body.year.value),
+        measurement_value=body.measurement_value,
+        measurement_unit=body.measurement_unit,
+        standardised_measurement_value=body.standardised_measurement_value,
+        standardised_measurement_unit=body.standardised_measurement_unit
+    )
+    load_record(incoming_measurement, db_cursor, db_conn)
+    return
