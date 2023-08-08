@@ -104,7 +104,7 @@ def get_measurement_from_db(
     )
 
 
-def load_record(measurement: Measurement, db: DatabaseObject) -> bool:
+def load_record(measurement: Measurement, db: DatabaseObject, commit: bool = True) -> bool:
     # this load function essentially does the following logic
     # does an insert or replace thus the measurement provided is the source of truth
     # if the measurement is already in the database, it will be replaced as it is assumed
@@ -133,7 +133,8 @@ def load_record(measurement: Measurement, db: DatabaseObject) -> bool:
             measurement.standardised_measurement_unit,
         ),
     )
-    db.db_conn.commit()
+    if commit:
+        db.db_conn.commit()
     return True
 
 
