@@ -25,20 +25,6 @@ class Measurement:
             "standardised_measurement_unit": self.standardised_measurement_unit,
         }
 
-
-# this is a configuration object:
-# it maps the csv columns in the source to the object attributes
-# should be moved out of the code
-# this is not very robust as it is quite "far" from the csv file ingestion point
-csv_ob_map = {
-    "seic_code": 4,
-    "nrg_bal_code": 3,
-    "country_code": 6,
-    "year": 7,
-    "measurement_value": 8,
-    "measurement_unit": 5,
-}
-
 # order of columns in the database measurements table to map to the object
 # not very elegant, improvement would be to use a proper ORM (sqlalchemy) for this instead
 db_ob_map = {
@@ -51,21 +37,6 @@ db_ob_map = {
     "standardised_measurement_value": 6,
     "standardised_measurement_unit": 7,
 }
-
-
-def create_measurement_object_from_csv_row(raw_measurement: List[str]) -> Measurement:
-    # should make this a configuration instead of hardcoding
-    return Measurement(
-        seic_code=raw_measurement[csv_ob_map["seic_code"]],
-        nrg_bal_code=raw_measurement[csv_ob_map["nrg_bal_code"]],
-        country_code=raw_measurement[csv_ob_map["country_code"]],
-        year=raw_measurement[csv_ob_map["year"]],
-        measurement_value=float(raw_measurement[csv_ob_map["measurement_value"]]),
-        measurement_unit=raw_measurement[csv_ob_map["measurement_unit"]],
-        standardised_measurement_value=None,
-        standardised_measurement_unit=None,
-    )
-
 
 def get_measurement_from_db(
     seic_code: str, nrg_bal_code: str, country_code: str, year: int, db: DatabaseObject
@@ -104,7 +75,7 @@ def get_measurement_from_db(
     )
 
 
-def load_record(measurement: Measurement, db: DatabaseObject) -> bool:
+def load_record(measurement: Measurement, db: DatabaseObject, commit: bool = True) -> bool:
     # this load function essentially does the following logic
     # does an insert or replace thus the measurement provided is the source of truth
     # if the measurement is already in the database, it will be replaced as it is assumed
@@ -133,7 +104,8 @@ def load_record(measurement: Measurement, db: DatabaseObject) -> bool:
             measurement.standardised_measurement_unit,
         ),
     )
-    db.db_conn.commit()
+    if commit:
+        db.db_conn.commit()
     return True
 
 
